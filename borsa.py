@@ -300,54 +300,44 @@ class BistAnalizUygulamasi:
         try:
             hisse = yf.Ticker(f"{hisse_kodu}.IS")
             df = hisse.history(period=periyot)
-            
+    
             if df.empty or len(df) < 5:
                 messagebox.showerror("Hata", "Yeterli veri bulunamadı")
                 return
                 
-            # Mum grafiği için veriyi hazırla
             df.index = pd.to_datetime(df.index)
             df = df[['Open', 'High', 'Low', 'Close', 'Volume']]
-            
-            # Grafik penceresi
+    
             grafik_pencere = tk.Toplevel()
             grafik_pencere.title(f"{hisse_kodu} Mum Grafiği - {periyot}")
             grafik_pencere.geometry("1100x850")
             
-            # Figür ve eksenleri oluştur
-            fig = plt.figure(figsize=(12, 8), facecolor=BG_COLOR)
-            ax1 = plt.subplot2grid((6,1), (0,0), rowspan=4, colspan=1)
-            ax2 = plt.subplot2grid((6,1), (4,0), rowspan=2, colspan=1, sharex=ax1)
-            
-            # Renk ayarları
+            # Renk ve stil
             mc = mpf.make_marketcolors(
-                up='#2ecc71', 
-                down='#e74c3c',
+                up='#2ecc71', down='#e74c3c',
                 wick={'up':'#2ecc71', 'down':'#e74c3c'},
                 edge={'up':'#2ecc71', 'down':'#e74c3c'},
                 volume='#3498db'
             )
             s = mpf.make_mpf_style(marketcolors=mc, gridstyle='--', gridcolor='#dddddd')
-            
-            # Mum grafiği oluştur
-            mpf.plot(df,
+    
+            # Mum grafiğini çiz, fig ve axes döner
+            fig, axes = mpf.plot(df,
                     type='candle',
                     style=s,
                     title=f'\n{hisse_kodu} Mum Grafiği ({periyot})',
                     ylabel='Fiyat (TL)',
-                    volume=ax2,
-                    ylabel_lower='Hacim',
-                    ax=ax1,
-                    show_nontrading=False,
+                    volume=True,
                     mav=(20, 50, 200),
                     tight_layout=True,
+                    returnfig=True,
                     warn_too_much_data=10000,
                     update_width_config=dict(
                         candle_linewidth=1.0,
                         candle_width=0.8,
                         volume_linewidth=1.0
                     ))
-            
+    
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
@@ -357,9 +347,10 @@ class BistAnalizUygulamasi:
                 grafik_pencere.destroy()
             
             grafik_pencere.protocol("WM_DELETE_WINDOW", on_close)
-            
+    
         except Exception as e:
             messagebox.showerror("Hata", f"Mum grafiği oluşturulamadı:\n{str(e)}")
+
     
     def analiz_et(self):
         hisse_kodu = self.hisse_var.get().strip().upper()
