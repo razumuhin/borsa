@@ -10,6 +10,8 @@ import mplfinance as mpf
 import numpy as np
 import requests
 from bs4 import BeautifulSoup
+from pazar_bilgisi import get_pazar_bilgisi
+
 
 # Stil sabitleri
 BG_COLOR = "#f0f2f5"
@@ -41,42 +43,31 @@ class BistAnalizUygulamasi:
         self.setup_ui()
         self.setup_styles()
 
+    
     def get_bist_hisse_listesi(self):
-        """BIST hisse listesini çeşitli kaynaklardan çeker"""
+        """Asenax API üzerinden BIST hisse listesini çeker, başarısız olursa varsayılan listeyi döndürür."""
         try:
-            # 1. YFinance ile BIST 100 endeksi bileşenlerini çek
-            try:
-                bist100 = yf.Ticker("^XU100.IS")
-                components = bist100.info.get('components', [])
-                if components:
-                    return sorted([c for c in components if isinstance(c, str)])
-            except:
-                pass
-            
-            # 2. Borsa Istanbul web sitesinden çek
-            try:
-                url = "https://www.borsaistanbul.com/tr/endeksler/XU100/endeks-bilesenleri"
-                headers = {'User-Agent': 'Mozilla/5.0'}
-                response = requests.get(url, headers=headers, timeout=10)
-                soup = BeautifulSoup(response.text, 'html.parser')
-                
-                hisseler = []
-                for row in soup.select('table tbody tr'):
-                    cols = row.find_all('td')
-                    if len(cols) > 1:
-                        hisse = cols[1].text.strip()
-                        if hisse and hisse.isalpha():
-                            hisseler.append(hisse)
+            url = "https://api.asenax.com/bist/list/"
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+
+            # JSON verisini al
+            data = response.json()
+
+            # 'data' içindeki 'kod' alanlarını al ve listeye ekle
+            if data["code"] == "0":
+                hisseler = [item["kod"] for item in data["data"] if "kod" in item]
                 if hisseler:
-                    return sorted(hisseler)
-            except:
-                pass
-            
-            return DEFAULT_HISSELER
-            
+                    return hisseler
+                else:
+                    print("Asenax API boş liste döndürdü.")
+            else:
+                print(f"Asenax API başarısız yanıt döndürdü: {data['code']}")
         except Exception as e:
-            print(f"Hisse listesi alınırken hata: {e}")
-            return DEFAULT_HISSELER
+            print(f"Asenax API'den hisse listesi alınırken hata: {e}")
+
+        print("Varsayılan listeye geçiliyor.")
+        return DEFAULT_HISSELER
 
     def setup_ui(self):
         # Başlık
@@ -200,6 +191,10 @@ class BistAnalizUygulamasi:
             # Kar marjı kontrolü
             profit_margins = info.get('profitMargins')
             profit_str = f"{profit_margins*100:.2f}%" if profit_margins else 'N/A'
+
+            # Pazar Bilgisi
+            pazar_bilgisi = get_pazar_bilgisi(hisse_kodu)
+
             
             return {
                 'Piyasa Değeri': market_cap_str,
@@ -208,7 +203,8 @@ class BistAnalizUygulamasi:
                 'Temettu Verimi': dividend_str,
                 'Son Çeyrek Kâr': profit_str,
                 '52 Hafta En Yüksek': info.get('fiftyTwoWeekHigh', 'N/A'),
-                '52 Hafta En Düşük': info.get('fiftyTwoWeekLow', 'N/A')
+                '52 Hafta En Düşük': info.get('fiftyTwoWeekLow', 'N/A'),
+                'Pazar': pazar_bilgisi
             }
         except Exception as e:
             print(f"Temel analiz hatası: {e}")
@@ -292,26 +288,26 @@ class BistAnalizUygulamasi:
     def mum_grafigi_goster(self):
         hisse_kodu = self.hisse_var.get().strip().upper()
         periyot = self.periyot_var.get()
-        
+
         if not hisse_kodu:
             messagebox.showwarning("Uyarı", "Lütfen bir hisse kodu seçin")
             return
-            
+
         try:
             hisse = yf.Ticker(f"{hisse_kodu}.IS")
             df = hisse.history(period=periyot)
-    
+
             if df.empty or len(df) < 5:
                 messagebox.showerror("Hata", "Yeterli veri bulunamadı")
                 return
-                
+
             df.index = pd.to_datetime(df.index)
             df = df[['Open', 'High', 'Low', 'Close', 'Volume']]
-    
+
             grafik_pencere = tk.Toplevel()
             grafik_pencere.title(f"{hisse_kodu} Mum Grafiği - {periyot}")
             grafik_pencere.geometry("1100x850")
-            
+
             # Renk ve stil
             mc = mpf.make_marketcolors(
                 up='#2ecc71', down='#e74c3c',
@@ -320,7 +316,7 @@ class BistAnalizUygulamasi:
                 volume='#3498db'
             )
             s = mpf.make_mpf_style(marketcolors=mc, gridstyle='--', gridcolor='#dddddd')
-    
+
             # Mum grafiğini çiz, fig ve axes döner
             fig, axes = mpf.plot(df,
                     type='candle',
@@ -337,17 +333,17 @@ class BistAnalizUygulamasi:
                         candle_width=0.8,
                         volume_linewidth=1.0
                     ))
-    
+
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-            
+
             def on_close():
                 plt.close(fig)
                 grafik_pencere.destroy()
-            
+
             grafik_pencere.protocol("WM_DELETE_WINDOW", on_close)
-    
+
         except Exception as e:
             messagebox.showerror("Hata", f"Mum grafiği oluşturulamadı:\n{str(e)}")
 
@@ -415,6 +411,7 @@ class BistAnalizUygulamasi:
    • Son Çeyrek Kâr: {temel.get('Son Çeyrek Kâr', 'N/A')}
    • 52 Hafta En Yüksek: {temel.get('52 Hafta En Yüksek', 'N/A')}
    • 52 Hafta En Düşük: {temel.get('52 Hafta En Düşük', 'N/A')}
+   • Pazar: {temel.get('Pazar', 'N/A')}
 """
             else:
                 analiz += "\n⚠ Temel analiz verileri alınamadı\n"
