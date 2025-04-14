@@ -233,44 +233,52 @@ class BistAnalizUygulamasi:
             
             plt.style.use('ggplot')
             
-            fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10), gridspec_kw={'height_ratios': [3, 1, 1]})
+            # 4 alt grafik için height_ratios güncellendi
+            fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 10), 
+                                                        gridspec_kw={'height_ratios': [2, 1], 'width_ratios': [3, 1]})
             fig.patch.set_facecolor(BG_COLOR)
             
-            # Fiyat grafiği
+            # Fiyat grafiği (ax1)
             ax1.plot(df.index, df['Close'], label='Kapanış', color='#2e86de', linewidth=2)
             ax1.plot(df.index, df['EMA_20'], label='EMA 20', linestyle='--', color='#ff9f43')
             ax1.plot(df.index, df['SMA_50'], label='SMA 50', linestyle=':', color='#5f27cd')
             ax1.plot(df.index, df['EMA_200'], label='EMA 200', linestyle='-.', color='#ff6b6b')
             ax1.fill_between(df.index, df['BB_upper'], df['BB_lower'], color='#c8d6e5', alpha=0.3)
-            ax1.set_title(f'{hisse_kodu} Fiyat Grafiği ({periyot})', fontsize=14, pad=20)
+            ax1.set_title(f'{hisse_kodu} Fiyat Grafiği ({periyot})', fontsize=14, pad=15)
             ax1.set_ylabel('Fiyat (TL)', fontsize=10)
             ax1.legend(loc='upper left', fontsize=9)
             ax1.grid(True, linestyle='--', alpha=0.7)
             
-            # RSI grafiği
+            # RSI grafiği (ax2)
             ax2.plot(df.index, df['RSI'], label='RSI 14', color='#10ac84', linewidth=2)
             ax2.axhline(70, color='#ff6b6b', linestyle='--', linewidth=1)
             ax2.axhline(30, color='#1dd1a1', linestyle='--', linewidth=1)
-            ax2.set_title('RSI (14)', fontsize=12, pad=20)
+            ax2.set_title('RSI (14)', fontsize=12, pad=15)
             ax2.set_ylabel('RSI', fontsize=10)
             ax2.set_ylim(0, 100)
             ax2.legend(loc='upper left', fontsize=9)
             ax2.grid(True, linestyle='--', alpha=0.7)
             
-            # MACD grafiği
+            # MACD grafiği (ax3)
             ax3.plot(df.index, df['MACD'], label='MACD', color='#9c88ff', linewidth=1.5)
             ax3.plot(df.index, df['MACD_signal'], label='Sinyal', color='#f368e0', linewidth=1.5)
             ax3.bar(df.index, df['MACD'] - df['MACD_signal'], label='Histogram', 
                    color=np.where(df['MACD'] > df['MACD_signal'], '#2ecc71', '#e74c3c'), alpha=0.5)
-            ax3.set_title('MACD (12,26,9)', fontsize=12, pad=20)
+            ax3.set_title('MACD (12,26,9)', fontsize=12, pad=15)
             ax3.legend(loc='upper left', fontsize=9)
             ax3.grid(True, linestyle='--', alpha=0.7)
+            
+            # Hacim grafiği (ax4)
+            ax4.bar(df.index, df['Volume']/1000000, color='#3498db', alpha=0.7)
+            ax4.set_title('Hacim (Milyon)', fontsize=12, pad=15)
+            ax4.set_ylabel('Hacim (M)')
+            ax4.grid(True, linestyle='--', alpha=0.5)
             
             plt.tight_layout()
             
             grafik_pencere = tk.Toplevel()
             grafik_pencere.title(f"{hisse_kodu} Teknik Grafik - {periyot}")
-            grafik_pencere.geometry("1100x850")
+            grafik_pencere.geometry("1200x900")
             
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
@@ -382,12 +390,15 @@ class BistAnalizUygulamasi:
 📈 {hisse_kodu.upper()}.IS ANALİZ RAPORU - {datetime.now().strftime('%d.%m.%Y %H:%M')}
 {'='*80}
 
-🔹 FİYAT BİLGİLERİ ({periyot}):
+🔹 FİYAT VE HACİM BİLGİLERİ ({periyot}):
    • Son Fiyat: {son_fiyat:.2f} TL
    • Günlük Değişim: {daily_change:+.2f} TL ({percent_change:+.2f}%)
-   • Ortalama: {df['Close'].mean():.2f} TL
-   • En Yüksek: {df['Close'].max():.2f} TL
-   • En Düşük: {df['Close'].min():.2f} TL
+   • Ortalama Fiyat: {df['Close'].mean():.2f} TL
+   • Ortalama Hacim: {df['Volume'].mean()/1000000:.2f} M
+   • Son Hacim: {df['Volume'].iloc[-1]/1000000:.2f} M
+   • En Yüksek Fiyat: {df['Close'].max():.2f} TL
+   • En Düşük Fiyat: {df['Close'].min():.2f} TL
+   • En Yüksek Hacim: {df['Volume'].max()/1000000:.2f} M
    • Volatilite: {(df['Close'].max() - df['Close'].min())/df['Close'].mean()*100:.2f}%
 
 📊 TEKNİK GÖSTERGELER:
@@ -399,6 +410,7 @@ class BistAnalizUygulamasi:
    • EMA 200: {son['EMA_200']:.2f} {"(Üstünde ▲)" if son['Close'] > son['EMA_200'] else "(Altında ▼)"}
    • Bollinger Band: {"(Üst Band)" if son['Close'] > son['BB_upper'] else "(Alt Band)" if son['Close'] < son['BB_lower'] else "(Orta Band)"}
    • OBV: {son['OBV']/1000000:+.2f} M
+   • Hacim Ortalama/Şimdi: {df['Volume'].mean()/1000000:.1f}M/{son['Volume']/1000000:.1f}M
 """
             # Temel analiz ekle
             if temel:
@@ -427,7 +439,12 @@ class BistAnalizUygulamasi:
             if son['Close'] > son['SMA_50']: buy_signal += 1
             if son['Close'] > son['EMA_200']: buy_signal += 1
             if son['Close'] < son['BB_lower']: buy_signal += 1
-            
+
+            # Sinyal analizine hacim kontrolü ekleyin
+            if son['Volume'] > df['Volume'].mean() * 1.5:  # Ortalamanın 1.5 katından fazla hacim
+                buy_signal += 1
+                analiz += "\n   • Yüksek Hacim: Alım satım ilgisinde artış"
+
             if buy_signal >= 4:
                 analiz += "   • GÜÇLÜ AL SİNYALİ (Çoğunlukla olumlu göstergeler)"
             elif buy_signal >= 2:
