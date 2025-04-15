@@ -144,8 +144,11 @@ class BistAnalizUygulamasi:
         transaction_frame.pack(fill=tk.X, padx=10, pady=5)
         
         ttk.Label(transaction_frame, text="Hisse:").grid(row=0, column=0, padx=5, pady=5)
-        symbol_entry = ttk.Entry(transaction_frame)
-        symbol_entry.grid(row=0, column=1, padx=5, pady=5)
+        symbol_var = tk.StringVar()
+        symbol_combo = ttk.Combobox(transaction_frame, textvariable=symbol_var, 
+                                  values=self.hisse_listesi, width=15)
+        symbol_combo.grid(row=0, column=1, padx=5, pady=5)
+        symbol_combo.set(self.hisse_listesi[0] if self.hisse_listesi else '')
         
         ttk.Label(transaction_frame, text="İşlem:").grid(row=0, column=2, padx=5, pady=5)
         operation_var = tk.StringVar(value="BUY")
@@ -163,7 +166,7 @@ class BistAnalizUygulamasi:
         
         def add_transaction():
             try:
-                symbol = symbol_entry.get().strip().upper()
+                symbol = symbol_var.get().strip().upper()
                 operation = operation_var.get()
                 price = float(price_entry.get())
                 quantity = int(quantity_entry.get())
