@@ -10,7 +10,6 @@ import mplfinance as mpf
 import numpy as np
 import requests
 from bs4 import BeautifulSoup
-from pazar_bilgisi import get_pazar_bilgisi
 
 
 # Stil sabitleri
@@ -191,10 +190,6 @@ class BistAnalizUygulamasi:
             # Kar marjı kontrolü
             profit_margins = info.get('profitMargins')
             profit_str = f"{profit_margins*100:.2f}%" if profit_margins else 'N/A'
-
-            # Pazar Bilgisi
-            pazar_bilgisi = get_pazar_bilgisi(hisse_kodu)
-
             
             return {
                 'Piyasa Değeri': market_cap_str,
@@ -204,7 +199,7 @@ class BistAnalizUygulamasi:
                 'Son Çeyrek Kâr': profit_str,
                 '52 Hafta En Yüksek': info.get('fiftyTwoWeekHigh', 'N/A'),
                 '52 Hafta En Düşük': info.get('fiftyTwoWeekLow', 'N/A'),
-                'Pazar': pazar_bilgisi
+
             }
         except Exception as e:
             print(f"Temel analiz hatası: {e}")
@@ -423,7 +418,7 @@ class BistAnalizUygulamasi:
    • Son Çeyrek Kâr: {temel.get('Son Çeyrek Kâr', 'N/A')}
    • 52 Hafta En Yüksek: {temel.get('52 Hafta En Yüksek', 'N/A')}
    • 52 Hafta En Düşük: {temel.get('52 Hafta En Düşük', 'N/A')}
-   • Pazar: {temel.get('Pazar', 'N/A')}
+ 
 """
             else:
                 analiz += "\n⚠ Temel analiz verileri alınamadı\n"
