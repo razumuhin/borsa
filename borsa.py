@@ -36,16 +36,16 @@ class BistAnalizUygulamasi:
         self.root.configure(bg=BG_COLOR)
         self.root.minsize(1000, 700)
         self.portfolio = Portfolio()
-        
+
         self.hisse_listesi = self.get_bist_hisse_listesi()
         if not self.hisse_listesi:
             messagebox.showwarning("Uyarı", "BIST hisse listesi alınamadı, varsayılan liste kullanılıyor")
             self.hisse_listesi = DEFAULT_HISSELER
-        
+
         self.setup_ui()
         self.setup_styles()
 
-    
+
     def get_bist_hisse_listesi(self):
         """Asenax API üzerinden BIST hisse listesini çeker, başarısız olursa varsayılan listeyi döndürür."""
         try:
@@ -75,10 +75,10 @@ class BistAnalizUygulamasi:
         # Başlık
         self.header = tk.Frame(self.root, bg=BUTTON_COLOR, height=80)
         self.header.pack(fill=tk.X, pady=(0, 10))
-        
+
         tk.Label(self.header, text="BIST ANALİZ UYGULAMASI", 
                 font=("Segoe UI", 18, "bold"), fg="white", bg=BUTTON_COLOR).pack(side=tk.LEFT, pady=20, padx=20)
-        
+
         # Portföy yönetimi butonu
         self.portfolio_button = ttk.Button(self.header, text="Portföy Yönetimi", 
                                          command=self.show_portfolio_window)
@@ -91,7 +91,7 @@ class BistAnalizUygulamasi:
         # Hisse seçim dropdown
         tk.Label(self.control_frame, text="Hisse Kodu:", bg=BG_COLOR, 
                 font=FONT, fg=LABEL_COLOR).grid(row=0, column=0, padx=5, sticky="w")
-        
+
         self.hisse_var = tk.StringVar()
         self.hisse_dropdown = ttk.Combobox(self.control_frame, textvariable=self.hisse_var, 
                                          values=self.hisse_listesi, width=15, font=FONT)
@@ -101,7 +101,7 @@ class BistAnalizUygulamasi:
         # Periyot seçimi
         tk.Label(self.control_frame, text="Periyot:", bg=BG_COLOR, 
                 font=FONT, fg=LABEL_COLOR).grid(row=0, column=2, padx=5, sticky="e")
-        
+
         self.periyot_var = tk.StringVar(value="3mo")
         self.periyot_dropdown = ttk.Combobox(self.control_frame, textvariable=self.periyot_var,
                                             values=["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y"], 
@@ -111,7 +111,7 @@ class BistAnalizUygulamasi:
         # Butonlar
         button_frame = tk.Frame(self.control_frame, bg=BG_COLOR)
         button_frame.grid(row=0, column=4, columnspan=5, padx=10)
-        
+
         ttk.Button(button_frame, text="Analiz Et", command=self.analiz_et).pack(side=tk.LEFT, padx=3)
         ttk.Button(button_frame, text="Çizgi Grafik", command=self.grafik_goster).pack(side=tk.LEFT, padx=3)
         ttk.Button(button_frame, text="Mum Grafiği", command=self.mum_grafigi_goster).pack(side=tk.LEFT, padx=3)
@@ -132,79 +132,107 @@ class BistAnalizUygulamasi:
 
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.text_output.pack(fill=tk.BOTH, expand=True)
-        
+
     def show_portfolio_window(self):
         portfolio_window = tk.Toplevel(self.root)
         portfolio_window.title("Portföy Yönetimi")
-        portfolio_window.geometry("800x600")
-        portfolio_window.configure(bg=BG_COLOR)
-        
+        portfolio_window.geometry("1000x700")
+        portfolio_window.configure(bg="#f8f9fa")
+
+        # Ana başlık
+        header_frame = tk.Frame(portfolio_window, bg="#4a6fa5", height=60)
+        header_frame.pack(fill=tk.X, pady=(0, 20))
+        tk.Label(header_frame, text="Portföy Yönetimi", font=("Segoe UI", 16, "bold"), 
+                fg="white", bg="#4a6fa5").pack(pady=15)
+
         # İşlem ekleme çerçevesi
-        transaction_frame = ttk.LabelFrame(portfolio_window, text="Yeni İşlem Ekle", padding=10)
-        transaction_frame.pack(fill=tk.X, padx=10, pady=5)
-        
-        ttk.Label(transaction_frame, text="Hisse:").grid(row=0, column=0, padx=5, pady=5)
+        transaction_frame = tk.Frame(portfolio_window, bg="#ffffff", padx=20, pady=15)
+        transaction_frame.pack(fill=tk.X, padx=20, pady=(0, 20))
+
+        # Alt başlık
+        tk.Label(transaction_frame, text="Yeni İşlem Ekle", font=("Segoe UI", 12, "bold"),
+                bg="#ffffff", fg="#2c3e50").pack(anchor="w", pady=(0, 10))
+
+        # Form alanları için grid frame
+        form_frame = tk.Frame(transaction_frame, bg="#ffffff")
+        form_frame.pack(fill=tk.X)
+
+        # Hisse seçimi
+        tk.Label(form_frame, text="Hisse Kodu:", bg="#ffffff", 
+                font=("Segoe UI", 10)).grid(row=0, column=0, padx=10, pady=5, sticky="e")
         symbol_var = tk.StringVar()
-        symbol_combo = ttk.Combobox(transaction_frame, textvariable=symbol_var, 
-                                  values=self.hisse_listesi, width=15)
-        symbol_combo.grid(row=0, column=1, padx=5, pady=5)
+        symbol_combo = ttk.Combobox(form_frame, textvariable=symbol_var,
+                                  values=self.hisse_listesi, width=15, font=("Segoe UI", 10))
+        symbol_combo.grid(row=0, column=1, padx=10, pady=5, sticky="w")
         symbol_combo.set(self.hisse_listesi[0] if self.hisse_listesi else '')
-        
-        ttk.Label(transaction_frame, text="İşlem:").grid(row=0, column=2, padx=5, pady=5)
-        operation_var = tk.StringVar(value="BUY")
-        operation_combo = ttk.Combobox(transaction_frame, textvariable=operation_var, 
-                                     values=["BUY", "SELL"], state="readonly", width=10)
-        operation_combo.grid(row=0, column=3, padx=5, pady=5)
-        
-        ttk.Label(transaction_frame, text="Fiyat:").grid(row=0, column=4, padx=5, pady=5)
-        price_entry = ttk.Entry(transaction_frame, width=10)
-        price_entry.grid(row=0, column=5, padx=5, pady=5)
-        
-        ttk.Label(transaction_frame, text="Adet:").grid(row=0, column=6, padx=5, pady=5)
-        quantity_entry = ttk.Entry(transaction_frame, width=10)
-        quantity_entry.grid(row=0, column=7, padx=5, pady=5)
-        
+
+        # İşlem tipi
+        tk.Label(form_frame, text="İşlem Tipi:", bg="#ffffff",
+                font=("Segoe UI", 10)).grid(row=0, column=2, padx=10, pady=5, sticky="e")
+        operation_var = tk.StringVar(value="AL")
+        operation_combo = ttk.Combobox(form_frame, textvariable=operation_var,
+                                     values=["AL", "SAT"], state="readonly", 
+                                     width=10, font=("Segoe UI", 10))
+        operation_combo.grid(row=0, column=3, padx=10, pady=5, sticky="w")
+
+        # Fiyat
+        tk.Label(form_frame, text="Fiyat (TL):", bg="#ffffff",
+                font=("Segoe UI", 10)).grid(row=0, column=4, padx=10, pady=5, sticky="e")
+        price_entry = ttk.Entry(form_frame, width=12, font=("Segoe UI", 10))
+        price_entry.grid(row=0, column=5, padx=10, pady=5, sticky="w")
+
+        # Adet
+        tk.Label(form_frame, text="Adet:", bg="#ffffff",
+                font=("Segoe UI", 10)).grid(row=0, column=6, padx=10, pady=5, sticky="e")
+        quantity_entry = ttk.Entry(form_frame, width=12, font=("Segoe UI", 10))
+        quantity_entry.grid(row=0, column=7, padx=10, pady=5, sticky="w")
+
         def add_transaction():
             try:
                 symbol = symbol_var.get().strip().upper()
                 operation = operation_var.get()
                 price = float(price_entry.get())
                 quantity = int(quantity_entry.get())
-                
-                self.portfolio.add_transaction(symbol, operation, price, quantity)
+
+                if operation == "AL":
+                    self.portfolio.add_transaction(symbol, "BUY", price, quantity)
+                else:
+                    self.portfolio.add_transaction(symbol, "SELL", price, quantity)
+
                 update_portfolio_view()
-                
-                symbol_entry.delete(0, tk.END)
+
+                symbol_combo.set('')
                 price_entry.delete(0, tk.END)
                 quantity_entry.delete(0, tk.END)
             except ValueError:
                 messagebox.showerror("Hata", "Lütfen geçerli değerler girin")
-        
-        ttk.Button(transaction_frame, text="İşlem Ekle", 
-                  command=add_transaction).grid(row=0, column=8, padx=5, pady=5)
-        
+
+        ttk.Button(form_frame, text="İşlem Ekle", command=add_transaction,
+                  style="TButton").grid(row=0, column=8, padx=10, pady=5)
+
+
         # Portföy görünümü
         portfolio_frame = ttk.LabelFrame(portfolio_window, text="Mevcut Portföy", padding=10)
         portfolio_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
-        
+
         columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar')
         portfolio_tree = ttk.Treeview(portfolio_frame, columns=columns, show='headings')
-        
+
         for col in columns:
             portfolio_tree.heading(col, text=col)
-            portfolio_tree.column(col, width=120)
-        
+            portfolio_tree.column(col, width=120, anchor=tk.CENTER)
+
         portfolio_scroll = ttk.Scrollbar(portfolio_frame, orient=tk.VERTICAL, 
                                        command=portfolio_tree.yview)
         portfolio_tree.configure(yscrollcommand=portfolio_scroll.set)
-        
+
         portfolio_scroll.pack(side=tk.RIGHT, fill=tk.Y)
         portfolio_tree.pack(fill=tk.BOTH, expand=True)
-        
+
         def update_portfolio_view():
             for item in portfolio_tree.get_children():
                 portfolio_tree.delete(item)
-                
+
             portfolio_data = self.portfolio.get_portfolio()
             for symbol, quantity, cost in portfolio_data:
                 try:
@@ -226,19 +254,19 @@ class BistAnalizUygulamasi:
                         "Veri Yok",
                         "Hesaplanamadı"
                     ))
-        
+
         update_portfolio_view()
-        
+
         # Otomatik güncelleme
         def auto_update():
             update_portfolio_view()
             portfolio_window.after(60000, auto_update)  # Her 1 dakikada bir güncelle
-        
+
         portfolio_window.after(60000, auto_update)
         # Klavye kısayolları
         self.hisse_dropdown.bind("<Return>", lambda event: self.analiz_et())
         self.hisse_dropdown.focus()
-        
+
     def setup_styles(self):
         style = ttk.Style()
         style.theme_use('clam')
@@ -249,12 +277,12 @@ class BistAnalizUygulamasi:
                 foreground=[("disabled", "#888888")])
         style.configure("TCombobox", font=FONT, padding=6)
         style.configure("Vertical.TScrollbar", background=BUTTON_COLOR)
-        
+
     def temizle(self):
         self.text_output.config(state=tk.NORMAL)
         self.text_output.delete(1.0, tk.END)
         self.text_output.config(state=tk.DISABLED)
-        
+
     def teknik_analiz(self, df):
         try:
             df = df.copy()
@@ -262,7 +290,7 @@ class BistAnalizUygulamasi:
             df['RSI'] = ta.momentum.RSIIndicator(df['Close'], window=14).rsi()
             df['Stoch_%K'] = ta.momentum.StochasticOscillator(
                 df['High'], df['Low'], df['Close'], window=14).stoch()
-            
+
             # Trend göstergeleri
             macd = ta.trend.MACD(df['Close'], window_slow=26, window_fast=12, window_sign=9)
             df['MACD'] = macd.macd()
@@ -270,38 +298,38 @@ class BistAnalizUygulamasi:
             df['EMA_20'] = ta.trend.EMAIndicator(df['Close'], window=20).ema_indicator()
             df['SMA_50'] = ta.trend.SMAIndicator(df['Close'], window=50).sma_indicator()
             df['EMA_200'] = ta.trend.EMAIndicator(df['Close'], window=200).ema_indicator()
-            
+
             # Volatilite göstergeleri
             bollinger = ta.volatility.BollingerBands(df['Close'], window=20, window_dev=2)
             df['BB_upper'] = bollinger.bollinger_hband()
             df['BB_middle'] = bollinger.bollinger_mavg()
             df['BB_lower'] = bollinger.bollinger_lband()
-            
+
             # Hacim analizi
             df['OBV'] = ta.volume.OnBalanceVolumeIndicator(df['Close'], df['Volume']).on_balance_volume()
-            
+
             return df
         except Exception as e:
             print(f"Teknik analiz hatası: {e}")
             return None
-            
+
     def temel_analiz(self, hisse_kodu):
         try:
             hisse = yf.Ticker(f"{hisse_kodu}.IS")
             info = hisse.info
-            
+
             # Market cap kontrolü
             market_cap = info.get('marketCap')
             market_cap_str = f"{market_cap/1000000:,.2f} M TL" if market_cap else 'N/A'
-            
+
             # Temettü verimi kontrolü
             dividend_yield = info.get('dividendYield')
             dividend_str = f"{dividend_yield*100:.2f}%" if dividend_yield else 'N/A'
-            
+
             # Kar marjı kontrolü
             profit_margins = info.get('profitMargins')
             profit_str = f"{profit_margins*100:.2f}%" if profit_margins else 'N/A'
-            
+
             return {
                 'Piyasa Değeri': market_cap_str,
                 'F/K': info.get('forwardPE', 'N/A'),
@@ -315,35 +343,35 @@ class BistAnalizUygulamasi:
         except Exception as e:
             print(f"Temel analiz hatası: {e}")
             return None
-            
+
     def grafik_goster(self):
         hisse_kodu = self.hisse_var.get().strip().upper()
         periyot = self.periyot_var.get()
-        
+
         if not hisse_kodu:
             messagebox.showwarning("Uyarı", "Lütfen bir hisse kodu seçin")
             return
-            
+
         try:
             hisse = yf.Ticker(f"{hisse_kodu}.IS")
             df = hisse.history(period=periyot)
-            
+
             if df.empty or len(df) < 5:
                 messagebox.showerror("Hata", "Yeterli veri bulunamadı")
                 return
-                
+
             df = self.teknik_analiz(df)
             if df is None:
                 messagebox.showerror("Hata", "Teknik analiz yapılamadı")
                 return
-            
+
             plt.style.use('ggplot')
-            
+
             # 4 alt grafik için height_ratios güncellendi
             fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 10), 
                                                         gridspec_kw={'height_ratios': [2, 1], 'width_ratios': [3, 1]})
             fig.patch.set_facecolor(BG_COLOR)
-            
+
             # Fiyat grafiği (ax1)
             ax1.plot(df.index, df['Close'], label='Kapanış', color='#2e86de', linewidth=2)
             ax1.plot(df.index, df['EMA_20'], label='EMA 20', linestyle='--', color='#ff9f43')
@@ -354,7 +382,7 @@ class BistAnalizUygulamasi:
             ax1.set_ylabel('Fiyat (TL)', fontsize=10)
             ax1.legend(loc='upper left', fontsize=9)
             ax1.grid(True, linestyle='--', alpha=0.7)
-            
+
             # RSI grafiği (ax2)
             ax2.plot(df.index, df['RSI'], label='RSI 14', color='#10ac84', linewidth=2)
             ax2.axhline(70, color='#ff6b6b', linestyle='--', linewidth=1)
@@ -364,7 +392,7 @@ class BistAnalizUygulamasi:
             ax2.set_ylim(0, 100)
             ax2.legend(loc='upper left', fontsize=9)
             ax2.grid(True, linestyle='--', alpha=0.7)
-            
+
             # MACD grafiği (ax3)
             ax3.plot(df.index, df['MACD'], label='MACD', color='#9c88ff', linewidth=1.5)
             ax3.plot(df.index, df['MACD_signal'], label='Sinyal', color='#f368e0', linewidth=1.5)
@@ -373,32 +401,32 @@ class BistAnalizUygulamasi:
             ax3.set_title('MACD (12,26,9)', fontsize=12, pad=15)
             ax3.legend(loc='upper left', fontsize=9)
             ax3.grid(True, linestyle='--', alpha=0.7)
-            
+
             # Hacim grafiği (ax4)
             ax4.bar(df.index, df['Volume']/1000000, color='#3498db', alpha=0.7)
             ax4.set_title('Hacim (Milyon)', fontsize=12, pad=15)
             ax4.set_ylabel('Hacim (M)')
             ax4.grid(True, linestyle='--', alpha=0.5)
-            
+
             plt.tight_layout()
-            
+
             grafik_pencere = tk.Toplevel()
             grafik_pencere.title(f"{hisse_kodu} Teknik Grafik - {periyot}")
             grafik_pencere.geometry("1200x900")
-            
+
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-            
+
             def on_close():
                 plt.close(fig)
                 grafik_pencere.destroy()
-            
+
             grafik_pencere.protocol("WM_DELETE_WINDOW", on_close)
-            
+
         except Exception as e:
             messagebox.showerror("Hata", f"Grafik oluşturulamadı:\n{str(e)}")
-            
+
     def mum_grafigi_goster(self):
         hisse_kodu = self.hisse_var.get().strip().upper()
         periyot = self.periyot_var.get()
@@ -461,11 +489,11 @@ class BistAnalizUygulamasi:
         except Exception as e:
             messagebox.showerror("Hata", f"Mum grafiği oluşturulamadı:\n{str(e)}")
 
-    
+
     def analiz_et(self):
         hisse_kodu = self.hisse_var.get().strip().upper()
         periyot = self.periyot_var.get()
-        
+
         if not hisse_kodu:
             messagebox.showwarning("Uyarı", "Lütfen bir hisse kodu seçin")
             return
@@ -482,15 +510,15 @@ class BistAnalizUygulamasi:
             if df is None:
                 messagebox.showerror("Hata", "Teknik analiz yapılamadı")
                 return
-                
+
             son_fiyat = df['Close'].iloc[-1]
             onceki_fiyat = df['Close'].iloc[-2] if len(df) > 1 else son_fiyat
             daily_change = son_fiyat - onceki_fiyat
             percent_change = (son_fiyat/onceki_fiyat-1)*100
-            
+
             son = df.iloc[-1]
             temel = self.temel_analiz(hisse_kodu)
-            
+
             # Analiz raporu oluştur
             analiz = f"""
 📈 {hisse_kodu.upper()}.IS ANALİZ RAPORU - {datetime.now().strftime('%d.%m.%Y %H:%M')}
@@ -529,7 +557,7 @@ class BistAnalizUygulamasi:
    • Son Çeyrek Kâr: {temel.get('Son Çeyrek Kâr', 'N/A')}
    • 52 Hafta En Yüksek: {temel.get('52 Hafta En Yüksek', 'N/A')}
    • 52 Hafta En Düşük: {temel.get('52 Hafta En Düşük', 'N/A')}
- 
+
 """
             else:
                 analiz += "\n⚠ Temel analiz verileri alınamadı\n"
@@ -537,7 +565,7 @@ class BistAnalizUygulamasi:
             # Sinyal analizi
             analiz += "\n💡 GENEL DEĞERLENDİRME:\n"
             buy_signal = 0
-            
+
             # Al sinyalleri
             if son['RSI'] < 35: buy_signal += 1
             if son['MACD'] > son['MACD_signal']: buy_signal += 1
@@ -547,7 +575,7 @@ class BistAnalizUygulamasi:
             if son['Close'] < son['BB_lower']: buy_signal += 1
 
             # Sinyal analizine hacim kontrolü ekleyin
-            if son['Volume'] > df['Volume'].mean() * 1.5:  # Ortalamanın 1.5 katından fazla hacim
+            if son['Volume'] > df['Volume'].mean() * 1.5:  # Ortalamanın 1.5 katından fazla hacim:
                 buy_signal += 1
                 analiz += "\n   • Yüksek Hacim: Alım satım ilgisinde artış"
 
