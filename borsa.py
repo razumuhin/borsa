@@ -136,32 +136,19 @@ class BistAnalizUygulamasi:
     def show_portfolio_window(self):
         portfolio_window = tk.Toplevel(self.root)
         portfolio_window.title("Portföy Yönetimi")
-        portfolio_window.geometry("1200x800")
-        portfolio_window.configure(bg="#FFFFFF")
+        portfolio_window.geometry("1000x600")
+        portfolio_window.configure(bg="#ffffff")
 
-        # Sol panel - İşlem ekleme
-        left_panel = tk.Frame(portfolio_window, bg="#F8F9FA", width=300)
-        left_panel.pack(side=tk.LEFT, fill=tk.Y, padx=20, pady=20)
-        left_panel.pack_propagate(False)
-
-        # Başlık
-        tk.Label(left_panel, text="Yeni İşlem", font=("Segoe UI", 16, "bold"), 
-                fg="#2C3E50", bg="#F8F9FA").pack(pady=(20,30))
+        # İşlem ekleme alanı
+        transaction_frame = tk.Frame(portfolio_window, bg="#ffffff")
+        transaction_frame.pack(fill=tk.X, padx=10, pady=5)
 
         # İşlem ekleme çerçevesi
-        # Form elemanları için frame
-        form_frame = tk.Frame(left_panel, bg="#F8F9FA")
-        form_frame.pack(fill=tk.X, pady=10, padx=20)
-
-        # Hisse Kodu
-        symbol_frame = tk.Frame(form_frame, bg="#F8F9FA")
-        symbol_frame.pack(fill=tk.X, pady=5)
-        tk.Label(symbol_frame, text="Hisse Kodu:", font=("Segoe UI", 11),
-                bg="#F8F9FA", fg="#2C3E50").pack(anchor="w")
+        ttk.Label(transaction_frame, text="Hisse:").grid(row=0, column=0, padx=5, pady=5)
         symbol_var = tk.StringVar()
-        symbol_combo = ttk.Combobox(symbol_frame, textvariable=symbol_var,
-                                  values=self.hisse_listesi, width=20, font=("Segoe UI", 11))
-        symbol_combo.pack(fill=tk.X, pady=(5,0))
+        symbol_combo = ttk.Combobox(transaction_frame, textvariable=symbol_var, 
+                                  values=self.hisse_listesi, width=15)
+        symbol_combo.grid(row=0, column=1, padx=5, pady=5)
         symbol_combo.set(self.hisse_listesi[0] if self.hisse_listesi else '')
 
         # İşlem Tipi
@@ -255,17 +242,9 @@ class BistAnalizUygulamasi:
         ttk.Button(left_panel, text="İşlemi Gerçekleştir", 
                   style="Accent.TButton", command=add_transaction).pack(pady=30)
 
-        # Sağ panel - Portföy tablosu
-        right_panel = tk.Frame(portfolio_window, bg="#FFFFFF")
-        right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=20, pady=20)
-
-        # Portföy başlığı
-        tk.Label(right_panel, text="Portföy Durumu", font=("Segoe UI", 16, "bold"),
-                fg="#2C3E50", bg="#FFFFFF").pack(pady=(0,20))
-
-        # Tablo frame
-        table_frame = tk.Frame(right_panel, bg="#FFFFFF")
-        table_frame.pack(fill=tk.BOTH, expand=True)
+        # Portföy tablosu
+        portfolio_frame = tk.Frame(portfolio_window, bg="#ffffff")
+        portfolio_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
         columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar', 'Alım Tarihi')
         portfolio_tree = ttk.Treeview(table_frame, columns=columns, show='headings', style="Custom.Treeview")
