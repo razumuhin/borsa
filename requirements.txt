@@ -5,3 +5,5 @@ matplotlib
 tkinter
 requests
 beautifulsoup4
+mplfinance
+numpy
