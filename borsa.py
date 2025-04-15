@@ -26,6 +26,8 @@ DEFAULT_HISSELER = [
     'TOASO', 'VAKBN', 'YKBNK', 'AKSA', 'ALARK', 'ANACM', 'ASUZU', 'BERA', 'BRISA', 'DOHOL'
 ]
 
+from portfolio import Portfolio
+
 class BistAnalizUygulamasi:
     def __init__(self, root):
         self.root = root
@@ -33,6 +35,7 @@ class BistAnalizUygulamasi:
         self.root.geometry("1100x800")
         self.root.configure(bg=BG_COLOR)
         self.root.minsize(1000, 700)
+        self.portfolio = Portfolio()
         
         self.hisse_listesi = self.get_bist_hisse_listesi()
         if not self.hisse_listesi:
@@ -72,6 +75,111 @@ class BistAnalizUygulamasi:
         # Başlık
         self.header = tk.Frame(self.root, bg=BUTTON_COLOR, height=80)
         self.header.pack(fill=tk.X, pady=(0, 10))
+        
+        # Portföy yönetimi butonu
+        self.portfolio_button = ttk.Button(self.header, text="Portföy Yönetimi", 
+                                         command=self.show_portfolio_window)
+        self.portfolio_button.pack(side=tk.RIGHT, padx=10, pady=20)
+        
+    def show_portfolio_window(self):
+        portfolio_window = tk.Toplevel(self.root)
+        portfolio_window.title("Portföy Yönetimi")
+        portfolio_window.geometry("800x600")
+        portfolio_window.configure(bg=BG_COLOR)
+        
+        # İşlem ekleme çerçevesi
+        transaction_frame = ttk.LabelFrame(portfolio_window, text="Yeni İşlem Ekle", padding=10)
+        transaction_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Label(transaction_frame, text="Hisse:").grid(row=0, column=0, padx=5, pady=5)
+        symbol_entry = ttk.Entry(transaction_frame)
+        symbol_entry.grid(row=0, column=1, padx=5, pady=5)
+        
+        ttk.Label(transaction_frame, text="İşlem:").grid(row=0, column=2, padx=5, pady=5)
+        operation_var = tk.StringVar(value="BUY")
+        operation_combo = ttk.Combobox(transaction_frame, textvariable=operation_var, 
+                                     values=["BUY", "SELL"], state="readonly", width=10)
+        operation_combo.grid(row=0, column=3, padx=5, pady=5)
+        
+        ttk.Label(transaction_frame, text="Fiyat:").grid(row=0, column=4, padx=5, pady=5)
+        price_entry = ttk.Entry(transaction_frame, width=10)
+        price_entry.grid(row=0, column=5, padx=5, pady=5)
+        
+        ttk.Label(transaction_frame, text="Adet:").grid(row=0, column=6, padx=5, pady=5)
+        quantity_entry = ttk.Entry(transaction_frame, width=10)
+        quantity_entry.grid(row=0, column=7, padx=5, pady=5)
+        
+        def add_transaction():
+            try:
+                symbol = symbol_entry.get().strip().upper()
+                operation = operation_var.get()
+                price = float(price_entry.get())
+                quantity = int(quantity_entry.get())
+                
+                self.portfolio.add_transaction(symbol, operation, price, quantity)
+                update_portfolio_view()
+                
+                symbol_entry.delete(0, tk.END)
+                price_entry.delete(0, tk.END)
+                quantity_entry.delete(0, tk.END)
+            except ValueError:
+                messagebox.showerror("Hata", "Lütfen geçerli değerler girin")
+        
+        ttk.Button(transaction_frame, text="İşlem Ekle", 
+                  command=add_transaction).grid(row=0, column=8, padx=5, pady=5)
+        
+        # Portföy görünümü
+        portfolio_frame = ttk.LabelFrame(portfolio_window, text="Mevcut Portföy", padding=10)
+        portfolio_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        
+        columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar')
+        portfolio_tree = ttk.Treeview(portfolio_frame, columns=columns, show='headings')
+        
+        for col in columns:
+            portfolio_tree.heading(col, text=col)
+            portfolio_tree.column(col, width=120)
+        
+        portfolio_scroll = ttk.Scrollbar(portfolio_frame, orient=tk.VERTICAL, 
+                                       command=portfolio_tree.yview)
+        portfolio_tree.configure(yscrollcommand=portfolio_scroll.set)
+        
+        portfolio_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        portfolio_tree.pack(fill=tk.BOTH, expand=True)
+        
+        def update_portfolio_view():
+            for item in portfolio_tree.get_children():
+                portfolio_tree.delete(item)
+                
+            portfolio_data = self.portfolio.get_portfolio()
+            for symbol, quantity, cost in portfolio_data:
+                try:
+                    current_price = yf.Ticker(f"{symbol}.IS").history(period="1d")['Close'].iloc[-1]
+                    current_value = current_price * quantity
+                    profit_loss = current_value - cost
+                    portfolio_tree.insert('', tk.END, values=(
+                        symbol,
+                        quantity,
+                        f"{cost:,.2f} TL",
+                        f"{current_value:,.2f} TL",
+                        f"{profit_loss:+,.2f} TL"
+                    ))
+                except:
+                    portfolio_tree.insert('', tk.END, values=(
+                        symbol,
+                        quantity,
+                        f"{cost:,.2f} TL",
+                        "Veri Yok",
+                        "Hesaplanamadı"
+                    ))
+        
+        update_portfolio_view()
+        
+        # Otomatik güncelleme
+        def auto_update():
+            update_portfolio_view()
+            portfolio_window.after(60000, auto_update)  # Her 1 dakikada bir güncelle
+        
+        portfolio_window.after(60000, auto_update)
         tk.Label(self.header, text="BIST ANALİZ UYGULAMASI", 
                 font=("Segoe UI", 18, "bold"), fg="white", bg=BUTTON_COLOR).pack(pady=20)
 
