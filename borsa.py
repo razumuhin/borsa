@@ -139,6 +139,84 @@ class BistAnalizUygulamasi:
         portfolio_window.geometry("1200x800")
         portfolio_window.configure(bg="#f8f9fa")
         
+        # Ana çerçeveler
+        form_frame = tk.Frame(portfolio_window, bg="#ffffff")
+        form_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        table_frame = tk.Frame(portfolio_window, bg="#ffffff")
+        table_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        # Form elemanları
+        tk.Label(form_frame, text="Hisse Kodu:", bg="#ffffff").grid(row=0, column=0, padx=5, pady=5)
+        symbol_var = tk.StringVar()
+        symbol_combo = ttk.Combobox(form_frame, textvariable=symbol_var, values=self.hisse_listesi)
+        symbol_combo.grid(row=0, column=1, padx=5, pady=5)
+        
+        tk.Label(form_frame, text="İşlem Tipi:", bg="#ffffff").grid(row=0, column=2, padx=5, pady=5)
+        operation_var = tk.StringVar(value="AL")
+        operation_combo = ttk.Combobox(form_frame, textvariable=operation_var, values=["AL", "SAT"], state="readonly")
+        operation_combo.grid(row=0, column=3, padx=5, pady=5)
+        
+        tk.Label(form_frame, text="Fiyat (TL):", bg="#ffffff").grid(row=0, column=4, padx=5, pady=5)
+        price_entry = ttk.Entry(form_frame)
+        price_entry.grid(row=0, column=5, padx=5, pady=5)
+        
+        tk.Label(form_frame, text="Adet:", bg="#ffffff").grid(row=0, column=6, padx=5, pady=5)
+        quantity_entry = ttk.Entry(form_frame)
+        quantity_entry.grid(row=0, column=7, padx=5, pady=5)
+        
+        # Tablo
+        columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar')
+        portfolio_tree = ttk.Treeview(table_frame, columns=columns, show='headings')
+        
+        for col in columns:
+            portfolio_tree.heading(col, text=col)
+            portfolio_tree.column(col, width=150)
+        
+        scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=portfolio_tree.yview)
+        portfolio_tree.configure(yscrollcommand=scrollbar.set)
+        
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        portfolio_tree.pack(fill=tk.BOTH, expand=True)
+        
+        def add_transaction():
+            try:
+                symbol = symbol_var.get().strip().upper()
+                operation = "BUY" if operation_var.get() == "AL" else "SELL"
+                price = float(price_entry.get())
+                quantity = int(quantity_entry.get())
+                
+                self.portfolio.add_transaction(symbol, operation, price, quantity)
+                update_portfolio_view()
+                
+                # Form temizleme
+                price_entry.delete(0, tk.END)
+                quantity_entry.delete(0, tk.END)
+                messagebox.showinfo("Başarılı", "İşlem başarıyla eklendi!")
+                
+            except ValueError as e:
+                messagebox.showerror("Hata", "Lütfen geçerli değerler girin!")
+        
+        def update_portfolio_view():
+            for item in portfolio_tree.get_children():
+                portfolio_tree.delete(item)
+                
+            portfolio_data = self.portfolio.get_portfolio()
+            for symbol, quantity, cost, date, avg_cost in portfolio_data:
+                portfolio_tree.insert('', tk.END, values=(
+                    symbol,
+                    quantity,
+                    f"{cost:,.2f} TL",
+                    "Hesaplanıyor...",
+                    "Hesaplanıyor..."
+                ))
+        
+        # İşlem ekle butonu
+        ttk.Button(form_frame, text="İşlem Ekle", command=add_transaction).grid(row=0, column=8, padx=20, pady=5)
+        
+        # İlk görünümü güncelle
+        update_portfolio_view()
+        
         # Ana container
         main_container = tk.Frame(portfolio_window, bg="#f8f9fa")
         main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
