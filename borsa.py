@@ -221,29 +221,29 @@ class BistAnalizUygulamasi:
         main_container = tk.Frame(portfolio_window, bg="#f8f9fa")
         main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
-        # Sol Panel - İşlem Ekleme Formu
-        left_panel = tk.Frame(main_container, bg="#ffffff", relief="ridge", bd=1)
-        left_panel.pack(side=tk.LEFT, fill=tk.Y, padx=(0,10), pady=5)
-        
-        # Form başlığı
-        header_frame = tk.Frame(left_panel, bg="#ffffff")
-        header_frame.pack(fill=tk.X, padx=20, pady=15)
-        header_label = tk.Label(header_frame, text="Yeni İşlem Ekle", 
-                              font=("Segoe UI", 14, "bold"), bg="#ffffff", fg="#2C3E50")
-        header_label.pack()
-        
-        # Form çerçevesi
-        form_frame = tk.Frame(left_panel, bg="#ffffff")
-        form_frame.pack(fill=tk.BOTH, padx=20, pady=10)
-        
-        # Form elemanları
-        fields = [
-            ("Hisse Kodu:", self.hisse_listesi),
-            ("İşlem Tipi:", ["AL", "SAT"]),
-            ("Fiyat (TL):", None),
-            ("Adet:", None),
-            ("Tarih:", datetime.now().strftime('%Y-%m-%d %H:%M'))
-        ]
+        ## Sol Panel - İşlem Ekleme Formu
+        #left_panel = tk.Frame(main_container, bg="#ffffff", relief="ridge", bd=1)
+        #left_panel.pack(side=tk.LEFT, fill=tk.Y, padx=(0,10), pady=5)
+        #
+        ## Form başlığı
+        #header_frame = tk.Frame(left_panel, bg="#ffffff")
+        #header_frame.pack(fill=tk.X, padx=20, pady=15)
+        #header_label = tk.Label(header_frame, text="Yeni İşlem Ekle", 
+        #                      font=("Segoe UI", 14, "bold"), bg="#ffffff", fg="#2C3E50")
+        #header_label.pack()
+        #
+        ## Form çerçevesi
+        #form_frame = tk.Frame(left_panel, bg="#ffffff")
+        #form_frame.pack(fill=tk.BOTH, padx=20, pady=10)
+        #
+        ## Form elemanları
+        #fields = [
+        #    ("Hisse Kodu:", self.hisse_listesi),
+        #    ("İşlem Tipi:", ["AL", "SAT"]),
+        #    ("Fiyat (TL):", None),
+        #    ("Adet:", None),
+        #    ("Tarih:", datetime.now().strftime('%Y-%m-%d %H:%M'))
+        #]
         
         entries = {}
         for i, (label_text, values) in enumerate(fields):
@@ -296,74 +296,74 @@ class BistAnalizUygulamasi:
         add_button.pack(fill=tk.X)
         
         # Sağ Panel - Portföy Tablosu
-        right_panel = tk.Frame(main_container, bg="#ffffff", relief="ridge", bd=1)
-        right_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, pady=5)
+        #right_panel = tk.Frame(main_container, bg="#ffffff", relief="ridge", bd=1)
+        #right_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, pady=5)
         
         # Tablo başlığı
         # Özet bilgiler
-        summary_frame = tk.Frame(right_panel, bg="#ffffff")
-        summary_frame.pack(fill=tk.X, padx=20, pady=10)
-        
-        total_stocks, total_investment, total_shares = self.portfolio.get_portfolio_summary()
-        
-        summary_text = f"Toplam Hisse Sayısı: {total_stocks} • " \
-                      f"Toplam Yatırım: {total_investment:,.2f} TL • " \
-                      f"Toplam Lot: {total_shares:,}"
-        
-        summary_label = tk.Label(summary_frame, text=summary_text,
-                               font=("Segoe UI", 11), bg="#ffffff", fg="#2C3E50")
-        summary_label.pack(pady=5)
-        
-        # Tablo başlığı
-        table_header = tk.Frame(right_panel, bg="#ffffff")
-        table_header.pack(fill=tk.X, padx=20, pady=15)
-        table_label = tk.Label(table_header, text="Portföy Durumu", 
-                             font=("Segoe UI", 14, "bold"), bg="#ffffff", fg="#2C3E50")
-        table_label.pack()
+        #summary_frame = tk.Frame(right_panel, bg="#ffffff")
+        #summary_frame.pack(fill=tk.X, padx=20, pady=10)
+        #
+        #total_stocks, total_investment, total_shares = self.portfolio.get_portfolio_summary()
+        #
+        #summary_text = f"Toplam Hisse Sayısı: {total_stocks} • " \
+        #              f"Toplam Yatırım: {total_investment:,.2f} TL • " \
+        #              f"Toplam Lot: {total_shares:,}"
+        #
+        #summary_label = tk.Label(summary_frame, text=summary_text,
+        #                       font=("Segoe UI", 11), bg="#ffffff", fg="#2C3E50")
+        #summary_label.pack(pady=5)
+       # 
+        ## Tablo başlığı
+        #table_header = tk.Frame(right_panel, bg="#ffffff")
+        #table_header.pack(fill=tk.X, padx=20, pady=15)
+        #table_label = tk.Label(table_header, text="Portföy Durumu", 
+        #                     font=("Segoe UI", 14, "bold"), bg="#ffffff", fg="#2C3E50")
+        #table_label.pack()
         
         # Tablo çerçevesi
-        table_frame = tk.Frame(right_panel, bg="#ffffff")
-        table_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0,20))
+        #table_frame = tk.Frame(right_panel, bg="#ffffff")
+        #table_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0,20))
         
         # Tablo
-        columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar', 'İşlem Tarihi')
-        portfolio_tree = ttk.Treeview(table_frame, columns=columns, show='headings', style="Custom.Treeview")
-        
-        for col in columns:
-            portfolio_tree.heading(col, text=col)
-            portfolio_tree.column(col, width=150, anchor=tk.CENTER)
-        
-        scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=portfolio_tree.yview)
-        portfolio_tree.configure(yscrollcommand=scrollbar.set)
-        
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        portfolio_tree.pack(fill=tk.BOTH, expand=True)
-
-        # İşlem detayları grid layout
-        tk.Label(form_frame, text="Hisse:", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=0, padx=5, pady=5)
-        symbol_var = tk.StringVar()
-        symbol_combo = ttk.Combobox(form_frame, textvariable=symbol_var, values=self.hisse_listesi, width=15)
-        symbol_combo.grid(row=0, column=1, padx=5, pady=5)
-        symbol_combo.set(self.hisse_listesi[0] if self.hisse_listesi else '')
-
-        tk.Label(form_frame, text="İşlem:", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=2, padx=5, pady=5)
-        operation_var = tk.StringVar(value="AL")
-        operation_combo = ttk.Combobox(form_frame, textvariable=operation_var, values=["AL", "SAT"], 
-                                     state="readonly", width=10)
-        operation_combo.grid(row=0, column=3, padx=5, pady=5)
-
-        tk.Label(form_frame, text="Fiyat (TL):", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=4, padx=5, pady=5)
-        price_entry = ttk.Entry(form_frame, width=12)
-        price_entry.grid(row=0, column=5, padx=5, pady=5)
-
-        tk.Label(form_frame, text="Adet:", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=6, padx=5, pady=5)
-        quantity_entry = ttk.Entry(form_frame, width=12)
-        quantity_entry.grid(row=0, column=7, padx=5, pady=5)
-
-        tk.Label(form_frame, text="Tarih:", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=8, padx=5, pady=5)
-        date_entry = ttk.Entry(form_frame, width=16)
-        date_entry.insert(0, datetime.now().strftime('%Y-%m-%d %H:%M'))
-        date_entry.grid(row=0, column=9, padx=5, pady=5)
+        #columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar', 'İşlem Tarihi')
+        #portfolio_tree = ttk.Treeview(table_frame, columns=columns, show='headings', style="Custom.Treeview")
+        #
+        #for col in columns:
+        #    portfolio_tree.heading(col, text=col)
+        #    portfolio_tree.column(col, width=150, anchor=tk.CENTER)
+        #
+        #scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=portfolio_tree.yview)
+        #portfolio_tree.configure(yscrollcommand=scrollbar.set)
+        #
+        #scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        #portfolio_tree.pack(fill=tk.BOTH, expand=True)
+#
+        ## İşlem detayları grid layout
+        #tk.Label(form_frame, text="Hisse:", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=0, padx=5, pady=5)
+        #symbol_var = tk.StringVar()
+        #symbol_combo = ttk.Combobox(form_frame, textvariable=symbol_var, values=self.hisse_listesi, width=15)
+        #symbol_combo.grid(row=0, column=1, padx=5, pady=5)
+        #symbol_combo.set(self.hisse_listesi[0] if self.hisse_listesi else '')
+#
+        #tk.Label(form_frame, text="İşlem:", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=2, padx=5, pady=5)
+        #operation_var = tk.StringVar(value="AL")
+        #operation_combo = ttk.Combobox(form_frame, textvariable=operation_var, values=["AL", "SAT"], 
+        #                             state="readonly", width=10)
+        #operation_combo.grid(row=0, column=3, padx=5, pady=5)
+#
+        #tk.Label(form_frame, text="Fiyat (TL):", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=4, padx=5, pady=5)
+        #price_entry = ttk.Entry(form_frame, width=12)
+        #price_entry.grid(row=0, column=5, padx=5, pady=5)
+#
+        #tk.Label(form_frame, text="Adet:", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=6, padx=5, pady=5)
+        #quantity_entry = ttk.Entry(form_frame, width=12)
+        #quantity_entry.grid(row=0, column=7, padx=5, pady=5)
+#
+        #tk.Label(form_frame, text="Tarih:", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=8, padx=5, pady=5)
+        #date_entry = ttk.Entry(form_frame, width=16)
+        #date_entry.insert(0, datetime.now().strftime('%Y-%m-%d %H:%M'))
+        #date_entry.grid(row=0, column=9, padx=5, pady=5)
 
         # İşlem ekleme çerçevesi
         ttk.Label(transaction_frame, text="Hisse:").grid(row=0, column=0, padx=5, pady=5)
