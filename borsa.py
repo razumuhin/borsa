@@ -136,26 +136,54 @@ class BistAnalizUygulamasi:
     def show_portfolio_window(self):
         portfolio_window = tk.Toplevel(self.root)
         portfolio_window.title("Portföy Yönetimi")
-        portfolio_window.geometry("1000x700")
-        portfolio_window.configure(bg="#f8f9fa")
+        portfolio_window.geometry("1200x800")
+        portfolio_window.configure(bg="#FFFFFF")
 
-        # Ana başlık
-        header_frame = tk.Frame(portfolio_window, bg="#4a6fa5", height=60)
-        header_frame.pack(fill=tk.X, pady=(0, 20))
-        tk.Label(header_frame, text="Portföy Yönetimi", font=("Segoe UI", 16, "bold"), 
-                fg="white", bg="#4a6fa5").pack(pady=15)
+        # Sol panel - İşlem ekleme
+        left_panel = tk.Frame(portfolio_window, bg="#F8F9FA", width=300)
+        left_panel.pack(side=tk.LEFT, fill=tk.Y, padx=20, pady=20)
+        left_panel.pack_propagate(False)
+
+        # Başlık
+        tk.Label(left_panel, text="Yeni İşlem", font=("Segoe UI", 16, "bold"), 
+                fg="#2C3E50", bg="#F8F9FA").pack(pady=(20,30))
 
         # İşlem ekleme çerçevesi
-        transaction_frame = tk.Frame(portfolio_window, bg="#ffffff", padx=20, pady=15)
-        transaction_frame.pack(fill=tk.X, padx=20, pady=(0, 20))
+        # Form elemanları
+        form_items = [
+            ("Hisse Kodu:", "symbol_var", self.hisse_listesi),
+            ("İşlem Tipi:", "operation_var", ["AL", "SAT"]),
+            ("Fiyat (TL):", "price_entry", None),
+            ("Adet:", "quantity_entry", None)
+        ]
 
-        # Alt başlık
-        tk.Label(transaction_frame, text="Yeni İşlem Ekle", font=("Segoe UI", 12, "bold"),
-                bg="#ffffff", fg="#2c3e50").pack(anchor="w", pady=(0, 10))
-
-        # Form alanları için grid frame
-        form_frame = tk.Frame(transaction_frame, bg="#ffffff")
-        form_frame.pack(fill=tk.X)
+        for i, (label_text, var_name, values) in enumerate(form_items):
+            frame = tk.Frame(left_panel, bg="#F8F9FA")
+            frame.pack(fill=tk.X, pady=10)
+            
+            tk.Label(frame, text=label_text, font=("Segoe UI", 11),
+                    bg="#F8F9FA", fg="#2C3E50").pack(anchor="w")
+            
+            if values is not None:
+                if var_name == "symbol_var":
+                    symbol_var = tk.StringVar()
+                    combo = ttk.Combobox(frame, textvariable=symbol_var,
+                                       values=values, width=20, font=("Segoe UI", 11))
+                    combo.pack(fill=tk.X, pady=(5,0))
+                    combo.set(values[0] if values else '')
+                else:
+                    operation_var = tk.StringVar(value="AL")
+                    combo = ttk.Combobox(frame, textvariable=operation_var,
+                                       values=values, state="readonly", 
+                                       width=20, font=("Segoe UI", 11))
+                    combo.pack(fill=tk.X, pady=(5,0))
+            else:
+                entry = ttk.Entry(frame, font=("Segoe UI", 11))
+                entry.pack(fill=tk.X, pady=(5,0))
+                if var_name == "price_entry":
+                    price_entry = entry
+                else:
+                    quantity_entry = entry
 
         # Hisse seçimi
         tk.Label(form_frame, text="Hisse Kodu:", bg="#ffffff", 
@@ -211,12 +239,24 @@ class BistAnalizUygulamasi:
                   style="TButton").grid(row=0, column=8, padx=10, pady=5)
 
 
-        # Portföy görünümü
-        portfolio_frame = ttk.LabelFrame(portfolio_window, text="Mevcut Portföy", padding=10)
-        portfolio_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        # İşlem butonu
+        ttk.Button(left_panel, text="İşlemi Gerçekleştir", 
+                  style="Accent.TButton", command=add_transaction).pack(pady=30)
+
+        # Sağ panel - Portföy tablosu
+        right_panel = tk.Frame(portfolio_window, bg="#FFFFFF")
+        right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        # Portföy başlığı
+        tk.Label(right_panel, text="Portföy Durumu", font=("Segoe UI", 16, "bold"),
+                fg="#2C3E50", bg="#FFFFFF").pack(pady=(0,20))
+
+        # Tablo frame
+        table_frame = tk.Frame(right_panel, bg="#FFFFFF")
+        table_frame.pack(fill=tk.BOTH, expand=True)
 
         columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar')
-        portfolio_tree = ttk.Treeview(portfolio_frame, columns=columns, show='headings')
+        portfolio_tree = ttk.Treeview(table_frame, columns=columns, show='headings', style="Custom.Treeview")
 
         for col in columns:
             portfolio_tree.heading(col, text=col)
@@ -270,8 +310,27 @@ class BistAnalizUygulamasi:
     def setup_styles(self):
         style = ttk.Style()
         style.theme_use('clam')
-        style.configure("TButton", font=FONT, padding=6, background=BUTTON_COLOR, 
-                      foreground="white")
+        
+        # Ana buton stili
+        style.configure("TButton", font=FONT, padding=10, background=BUTTON_COLOR)
+        
+        # Özel buton stili
+        style.configure("Accent.TButton", 
+                       font=("Segoe UI", 11),
+                       padding=15,
+                       background="#4CAF50",
+                       foreground="white")
+        
+        # Treeview stili
+        style.configure("Custom.Treeview",
+                       font=("Segoe UI", 10),
+                       rowheight=35,
+                       background="#FFFFFF",
+                       fieldbackground="#FFFFFF")
+        
+        style.configure("Custom.Treeview.Heading",
+                       font=("Segoe UI", 10, "bold"),
+                       padding=10)
         style.map("TButton", 
                 background=[("active", "#3a5a8a"), ("disabled", "#cccccc")],
                 foreground=[("disabled", "#888888")])
