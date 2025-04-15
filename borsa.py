@@ -246,7 +246,7 @@ class BistAnalizUygulamasi:
         portfolio_frame = tk.Frame(portfolio_window, bg="#ffffff")
         portfolio_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
-        columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar', 'Alım Tarihi')
+        columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar', 'İşlem Tarihi')
         portfolio_tree = ttk.Treeview(table_frame, columns=columns, show='headings', style="Custom.Treeview")
 
         for col in columns:

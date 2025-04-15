@@ -46,7 +46,7 @@ class Portfolio:
             symbol,
             total_quantity,
             total_cost,
-            first_buy_date,
+            strftime('%d.%m.%Y %H:%M', datetime(substr(first_buy_date, 1, 19))) as formatted_date,
             total_cost/total_quantity as avg_cost
         FROM PortfolioSummary
         ''')
