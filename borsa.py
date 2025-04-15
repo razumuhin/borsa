@@ -269,7 +269,10 @@ class BistAnalizUygulamasi:
         # İşlem ekle butonu
         add_button = ttk.Button(form_frame, text="İşlem Ekle", command=add_transaction,
                               style="Accent.TButton")
-        add_button.grid(row=0, column=8, padx=10, pady=5, sticky="ew")
+        add_button.grid(row=0, column=9, padx=10, pady=5, sticky="ew")
+
+        # Grid yapısını düzenle
+        form_frame.grid_columnconfigure(9, weight=1)
 
 
         # İşlem butonu
