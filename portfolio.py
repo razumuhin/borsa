@@ -32,12 +32,23 @@ class Portfolio:
     def get_portfolio(self):
         cursor = self.conn.cursor()
         cursor.execute('''
-        SELECT symbol,
-               SUM(CASE WHEN operation='BUY' THEN quantity ELSE -quantity END) as total_quantity,
-               SUM(CASE WHEN operation='BUY' THEN price*quantity ELSE -price*quantity END) as total_cost
-        FROM transactions
-        GROUP BY symbol
-        HAVING total_quantity > 0
+        WITH PortfolioSummary AS (
+            SELECT 
+                symbol,
+                SUM(CASE WHEN operation='BUY' THEN quantity ELSE -quantity END) as total_quantity,
+                SUM(CASE WHEN operation='BUY' THEN price*quantity ELSE -price*quantity END) as total_cost,
+                MIN(CASE WHEN operation='BUY' THEN date END) as first_buy_date
+            FROM transactions
+            GROUP BY symbol
+            HAVING total_quantity > 0
+        )
+        SELECT 
+            symbol,
+            total_quantity,
+            total_cost,
+            first_buy_date,
+            total_cost/total_quantity as avg_cost
+        FROM PortfolioSummary
         ''')
         return cursor.fetchall()
         

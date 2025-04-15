@@ -255,7 +255,7 @@ class BistAnalizUygulamasi:
         table_frame = tk.Frame(right_panel, bg="#FFFFFF")
         table_frame.pack(fill=tk.BOTH, expand=True)
 
-        columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar')
+        columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar', 'Alım Tarihi')
         portfolio_tree = ttk.Treeview(table_frame, columns=columns, show='headings', style="Custom.Treeview")
 
         for col in columns:
@@ -274,25 +274,30 @@ class BistAnalizUygulamasi:
                 portfolio_tree.delete(item)
 
             portfolio_data = self.portfolio.get_portfolio()
-            for symbol, quantity, cost in portfolio_data:
+            for symbol, quantity, cost, buy_date, avg_cost in portfolio_data:
                 try:
                     current_price = yf.Ticker(f"{symbol}.IS").history(period="1d")['Close'].iloc[-1]
                     current_value = current_price * quantity
                     profit_loss = current_value - cost
+                    profit_percentage = (profit_loss / cost) * 100
+                    formatted_date = datetime.strptime(buy_date, '%Y-%m-%d %H:%M:%S').strftime('%d.%m.%Y')
+                    
                     portfolio_tree.insert('', tk.END, values=(
                         symbol,
                         quantity,
-                        f"{cost:,.2f} TL",
+                        f"{avg_cost:,.2f} TL",
                         f"{current_value:,.2f} TL",
-                        f"{profit_loss:+,.2f} TL"
+                        f"{profit_loss:+,.2f} TL (%{profit_percentage:+.2f})",
+                        formatted_date
                     ))
                 except:
                     portfolio_tree.insert('', tk.END, values=(
                         symbol,
                         quantity,
-                        f"{cost:,.2f} TL",
+                        f"{avg_cost:,.2f} TL",
                         "Veri Yok",
-                        "Hesaplanamadı"
+                        "Hesaplanamadı",
+                        formatted_date
                     ))
 
         update_portfolio_view()
