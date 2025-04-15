@@ -222,6 +222,21 @@ class BistAnalizUygulamasi:
         right_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, pady=5)
         
         # Tablo başlığı
+        # Özet bilgiler
+        summary_frame = tk.Frame(right_panel, bg="#ffffff")
+        summary_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        total_stocks, total_investment, total_shares = self.portfolio.get_portfolio_summary()
+        
+        summary_text = f"Toplam Hisse Sayısı: {total_stocks} • " \
+                      f"Toplam Yatırım: {total_investment:,.2f} TL • " \
+                      f"Toplam Lot: {total_shares:,}"
+        
+        summary_label = tk.Label(summary_frame, text=summary_text,
+                               font=("Segoe UI", 11), bg="#ffffff", fg="#2C3E50")
+        summary_label.pack(pady=5)
+        
+        # Tablo başlığı
         table_header = tk.Frame(right_panel, bg="#ffffff")
         table_header.pack(fill=tk.X, padx=20, pady=15)
         table_label = tk.Label(table_header, text="Portföy Durumu", 

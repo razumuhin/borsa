@@ -60,3 +60,15 @@ class Portfolio:
         else:
             cursor.execute('SELECT * FROM transactions ORDER BY date DESC')
         return cursor.fetchall()
+
+    def get_portfolio_summary(self):
+        """Portföy özet bilgilerini döndürür"""
+        cursor = self.conn.cursor()
+        cursor.execute('''
+        SELECT 
+            COUNT(DISTINCT symbol) as total_stocks,
+            SUM(CASE WHEN operation='BUY' THEN price*quantity ELSE -price*quantity END) as total_investment,
+            SUM(CASE WHEN operation='BUY' THEN quantity ELSE -quantity END) as total_shares
+        FROM transactions
+        ''')
+        return cursor.fetchone()
