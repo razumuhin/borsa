@@ -20,9 +20,10 @@ class Portfolio:
         )''')
         self.conn.commit()
         
-    def add_transaction(self, symbol, operation, price, quantity):
+    def add_transaction(self, symbol, operation, price, quantity, date=None):
         cursor = self.conn.cursor()
-        date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if date is None:
+            date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         cursor.execute('''
         INSERT INTO transactions (symbol, operation, price, quantity, date)
         VALUES (?, ?, ?, ?, ?)
