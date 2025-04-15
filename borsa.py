@@ -235,58 +235,6 @@ class BistAnalizUygulamasi:
             portfolio_window.after(60000, auto_update)  # Her 1 dakikada bir güncelle
         
         portfolio_window.after(60000, auto_update)
-        tk.Label(self.header, text="BIST ANALİZ UYGULAMASI", 
-                font=("Segoe UI", 18, "bold"), fg="white", bg=BUTTON_COLOR).pack(pady=20)
-
-        # Kontrol paneli
-        self.control_frame = tk.Frame(self.root, bg=BG_COLOR, padx=15, pady=15)
-        self.control_frame.pack(fill=tk.X)
-
-        # Hisse seçim dropdown
-        tk.Label(self.control_frame, text="Hisse Kodu:", bg=BG_COLOR, 
-                font=FONT, fg=LABEL_COLOR).grid(row=0, column=0, padx=5, sticky="w")
-        
-        self.hisse_var = tk.StringVar()
-        self.hisse_dropdown = ttk.Combobox(self.control_frame, textvariable=self.hisse_var, 
-                                         values=self.hisse_listesi, width=15, font=FONT)
-        self.hisse_dropdown.grid(row=0, column=1, padx=5)
-        self.hisse_dropdown.set('THYAO' if 'THYAO' in self.hisse_listesi else self.hisse_listesi[0])
-
-        # Periyot seçimi
-        tk.Label(self.control_frame, text="Periyot:", bg=BG_COLOR, 
-                font=FONT, fg=LABEL_COLOR).grid(row=0, column=2, padx=5, sticky="e")
-        
-        self.periyot_var = tk.StringVar(value="3mo")
-        self.periyot_dropdown = ttk.Combobox(self.control_frame, textvariable=self.periyot_var,
-                                            values=["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y"], 
-                                            width=8, font=FONT)
-        self.periyot_dropdown.grid(row=0, column=3, padx=5)
-
-        # Butonlar
-        button_frame = tk.Frame(self.control_frame, bg=BG_COLOR)
-        button_frame.grid(row=0, column=4, columnspan=5, padx=10)
-        
-        ttk.Button(button_frame, text="Analiz Et", command=self.analiz_et).pack(side=tk.LEFT, padx=3)
-        ttk.Button(button_frame, text="Çizgi Grafik", command=self.grafik_goster).pack(side=tk.LEFT, padx=3)
-        ttk.Button(button_frame, text="Mum Grafiği", command=self.mum_grafigi_goster).pack(side=tk.LEFT, padx=3)
-        ttk.Button(button_frame, text="Temizle", command=self.temizle).pack(side=tk.LEFT, padx=3)
-        ttk.Button(button_frame, text="Çıkış", command=self.root.quit).pack(side=tk.LEFT, padx=3)
-
-        # Sonuç alanı
-        self.result_frame = tk.Frame(self.root, bg=BG_COLOR, padx=15, pady=15)
-        self.result_frame.pack(fill=tk.BOTH, expand=True)
-
-        self.text_output = tk.Text(self.result_frame, height=30, width=130, wrap=tk.WORD, 
-                                 bg="white", fg=TEXT_COLOR, font=("Consolas", 10), 
-                                 padx=15, pady=15, relief=tk.FLAT)
-        self.scrollbar = ttk.Scrollbar(self.result_frame, orient=tk.VERTICAL, 
-                                     command=self.text_output.yview)
-        self.text_output.configure(yscrollcommand=self.scrollbar.set)
-        self.text_output.config(state=tk.DISABLED)
-
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.text_output.pack(fill=tk.BOTH, expand=True)
-
         # Klavye kısayolları
         self.hisse_dropdown.bind("<Return>", lambda event: self.analiz_et())
         self.hisse_dropdown.focus()
