@@ -38,7 +38,7 @@ class Portfolio:
                 symbol,
                 SUM(CASE WHEN operation='BUY' THEN quantity ELSE -quantity END) as total_quantity,
                 SUM(CASE WHEN operation='BUY' THEN price*quantity ELSE -price*quantity END) as total_cost,
-                MIN(CASE WHEN operation='BUY' THEN date END) as first_buy_date
+                MAX(date) as last_transaction_date
             FROM transactions
             GROUP BY symbol
             HAVING total_quantity > 0
@@ -46,10 +46,11 @@ class Portfolio:
         SELECT 
             symbol,
             total_quantity,
-            total_cost,
-            strftime('%d.%m.%Y %H:%M', datetime(substr(first_buy_date, 1, 19))) as formatted_date,
-            total_cost/total_quantity as avg_cost
+            ABS(total_cost) as total_cost,
+            last_transaction_date,
+            ABS(total_cost/total_quantity) as avg_cost
         FROM PortfolioSummary
+        ORDER BY last_transaction_date DESC
         ''')
         return cursor.fetchall()
         
