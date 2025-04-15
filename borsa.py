@@ -266,8 +266,10 @@ class BistAnalizUygulamasi:
             except ValueError:
                 messagebox.showerror("Hata", "Lütfen geçerli değerler girin")
 
-        ttk.Button(form_frame, text="İşlem Ekle", command=add_transaction,
-                  style="TButton").grid(row=0, column=8, padx=10, pady=5)
+        # İşlem ekle butonu
+        add_button = ttk.Button(form_frame, text="İşlem Ekle", command=add_transaction,
+                              style="Accent.TButton")
+        add_button.grid(row=0, column=8, padx=10, pady=5, sticky="ew")
 
 
         # İşlem butonu
