@@ -1,8 +1,8 @@
+
 yfinance
 pandas
 ta
 matplotlib
-tkinter
 requests
 beautifulsoup4
 mplfinance
