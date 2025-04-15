@@ -136,17 +136,115 @@ class BistAnalizUygulamasi:
     def show_portfolio_window(self):
         portfolio_window = tk.Toplevel(self.root)
         portfolio_window.title("Portföy Yönetimi")
-        portfolio_window.geometry("1000x600")
-        portfolio_window.configure(bg="#ffffff")
+        portfolio_window.geometry("1200x800")
+        portfolio_window.configure(bg="#f8f9fa")
+        
+        # Ana container
+        main_container = tk.Frame(portfolio_window, bg="#f8f9fa")
+        main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        # Sol Panel - İşlem Ekleme Formu
+        left_panel = tk.Frame(main_container, bg="#ffffff", relief="ridge", bd=1)
+        left_panel.pack(side=tk.LEFT, fill=tk.Y, padx=(0,10), pady=5)
         
         # Form başlığı
-        header_label = tk.Label(portfolio_window, text="Yeni İşlem Ekle", 
-                              font=("Segoe UI", 12, "bold"), bg="#ffffff")
-        header_label.pack(pady=10)
-
-        # İşlem ekleme alanı
-        form_frame = tk.Frame(portfolio_window, bg="#ffffff", relief="groove", bd=1)
-        form_frame.pack(fill=tk.X, padx=20, pady=5)
+        header_frame = tk.Frame(left_panel, bg="#ffffff")
+        header_frame.pack(fill=tk.X, padx=20, pady=15)
+        header_label = tk.Label(header_frame, text="Yeni İşlem Ekle", 
+                              font=("Segoe UI", 14, "bold"), bg="#ffffff", fg="#2C3E50")
+        header_label.pack()
+        
+        # Form çerçevesi
+        form_frame = tk.Frame(left_panel, bg="#ffffff")
+        form_frame.pack(fill=tk.BOTH, padx=20, pady=10)
+        
+        # Form elemanları
+        fields = [
+            ("Hisse Kodu:", self.hisse_listesi),
+            ("İşlem Tipi:", ["AL", "SAT"]),
+            ("Fiyat (TL):", None),
+            ("Adet:", None),
+            ("Tarih:", datetime.now().strftime('%Y-%m-%d %H:%M'))
+        ]
+        
+        entries = {}
+        for i, (label_text, values) in enumerate(fields):
+            frame = tk.Frame(form_frame, bg="#ffffff")
+            frame.pack(fill=tk.X, pady=10)
+            
+            label = tk.Label(frame, text=label_text, font=("Segoe UI", 11),
+                           bg="#ffffff", fg="#2C3E50", width=10, anchor="w")
+            label.pack(side=tk.LEFT, padx=(0,10))
+            
+            if isinstance(values, list):
+                var = tk.StringVar(value=values[0])
+                entry = ttk.Combobox(frame, values=values, textvariable=var,
+                                   state="readonly" if label_text == "İşlem Tipi:" else "normal",
+                                   width=20, font=("Segoe UI", 11))
+                entries[label_text] = var
+            else:
+                entry = ttk.Entry(frame, font=("Segoe UI", 11), width=20)
+                if values:  # Tarih için varsayılan değer
+                    entry.insert(0, values)
+                entries[label_text] = entry
+            entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+            
+        def add_transaction():
+            try:
+                symbol = entries["Hisse Kodu:"].get().strip().upper()
+                operation = "BUY" if entries["İşlem Tipi:"].get() == "AL" else "SELL"
+                price = float(entries["Fiyat (TL):"].get())
+                quantity = int(entries["Adet:"].get())
+                date = entries["Tarih:"].get()
+                
+                self.portfolio.add_transaction(symbol, operation, price, quantity, date)
+                update_portfolio_view()
+                
+                # Form temizleme
+                entries["Fiyat (TL):"].delete(0, tk.END)
+                entries["Adet:"].delete(0, tk.END)
+                entries["Tarih:"].delete(0, tk.END)
+                entries["Tarih:"].insert(0, datetime.now().strftime('%Y-%m-%d %H:%M'))
+                
+                messagebox.showinfo("Başarılı", "İşlem başarıyla eklendi!")
+            except ValueError as e:
+                messagebox.showerror("Hata", "Lütfen geçerli değerler girin!")
+                
+        # İşlem ekle butonu
+        button_frame = tk.Frame(left_panel, bg="#ffffff")
+        button_frame.pack(fill=tk.X, padx=20, pady=20)
+        add_button = ttk.Button(button_frame, text="İşlem Ekle", command=add_transaction,
+                              style="Accent.TButton")
+        add_button.pack(fill=tk.X)
+        
+        # Sağ Panel - Portföy Tablosu
+        right_panel = tk.Frame(main_container, bg="#ffffff", relief="ridge", bd=1)
+        right_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, pady=5)
+        
+        # Tablo başlığı
+        table_header = tk.Frame(right_panel, bg="#ffffff")
+        table_header.pack(fill=tk.X, padx=20, pady=15)
+        table_label = tk.Label(table_header, text="Portföy Durumu", 
+                             font=("Segoe UI", 14, "bold"), bg="#ffffff", fg="#2C3E50")
+        table_label.pack()
+        
+        # Tablo çerçevesi
+        table_frame = tk.Frame(right_panel, bg="#ffffff")
+        table_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0,20))
+        
+        # Tablo
+        columns = ('Hisse', 'Toplam Adet', 'Maliyet', 'Güncel Değer', 'Kar/Zarar', 'İşlem Tarihi')
+        portfolio_tree = ttk.Treeview(table_frame, columns=columns, show='headings', style="Custom.Treeview")
+        
+        for col in columns:
+            portfolio_tree.heading(col, text=col)
+            portfolio_tree.column(col, width=150, anchor=tk.CENTER)
+        
+        scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=portfolio_tree.yview)
+        portfolio_tree.configure(yscrollcommand=scrollbar.set)
+        
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        portfolio_tree.pack(fill=tk.BOTH, expand=True)
 
         # İşlem detayları grid layout
         tk.Label(form_frame, text="Hisse:", bg="#ffffff", font=("Segoe UI", 10)).grid(row=0, column=0, padx=5, pady=5)
