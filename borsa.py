@@ -149,41 +149,53 @@ class BistAnalizUygulamasi:
                 fg="#2C3E50", bg="#F8F9FA").pack(pady=(20,30))
 
         # İşlem ekleme çerçevesi
-        # Form elemanları
-        form_items = [
-            ("Hisse Kodu:", "symbol_var", self.hisse_listesi),
-            ("İşlem Tipi:", "operation_var", ["AL", "SAT"]),
-            ("Fiyat (TL):", "price_entry", None),
-            ("Adet:", "quantity_entry", None)
-        ]
+        # Form elemanları için frame
+        form_frame = tk.Frame(left_panel, bg="#F8F9FA")
+        form_frame.pack(fill=tk.X, pady=10, padx=20)
 
-        for i, (label_text, var_name, values) in enumerate(form_items):
-            frame = tk.Frame(left_panel, bg="#F8F9FA")
-            frame.pack(fill=tk.X, pady=10)
-            
-            tk.Label(frame, text=label_text, font=("Segoe UI", 11),
-                    bg="#F8F9FA", fg="#2C3E50").pack(anchor="w")
-            
-            if values is not None:
-                if var_name == "symbol_var":
-                    symbol_var = tk.StringVar()
-                    combo = ttk.Combobox(frame, textvariable=symbol_var,
-                                       values=values, width=20, font=("Segoe UI", 11))
-                    combo.pack(fill=tk.X, pady=(5,0))
-                    combo.set(values[0] if values else '')
-                else:
-                    operation_var = tk.StringVar(value="AL")
-                    combo = ttk.Combobox(frame, textvariable=operation_var,
-                                       values=values, state="readonly", 
-                                       width=20, font=("Segoe UI", 11))
-                    combo.pack(fill=tk.X, pady=(5,0))
-            else:
-                entry = ttk.Entry(frame, font=("Segoe UI", 11))
-                entry.pack(fill=tk.X, pady=(5,0))
-                if var_name == "price_entry":
-                    price_entry = entry
-                else:
-                    quantity_entry = entry
+        # Hisse Kodu
+        symbol_frame = tk.Frame(form_frame, bg="#F8F9FA")
+        symbol_frame.pack(fill=tk.X, pady=5)
+        tk.Label(symbol_frame, text="Hisse Kodu:", font=("Segoe UI", 11),
+                bg="#F8F9FA", fg="#2C3E50").pack(anchor="w")
+        symbol_var = tk.StringVar()
+        symbol_combo = ttk.Combobox(symbol_frame, textvariable=symbol_var,
+                                  values=self.hisse_listesi, width=20, font=("Segoe UI", 11))
+        symbol_combo.pack(fill=tk.X, pady=(5,0))
+        symbol_combo.set(self.hisse_listesi[0] if self.hisse_listesi else '')
+
+        # İşlem Tipi
+        operation_frame = tk.Frame(form_frame, bg="#F8F9FA")
+        operation_frame.pack(fill=tk.X, pady=5)
+        tk.Label(operation_frame, text="İşlem Tipi:", font=("Segoe UI", 11),
+                bg="#F8F9FA", fg="#2C3E50").pack(anchor="w")
+        operation_var = tk.StringVar(value="AL")
+        operation_combo = ttk.Combobox(operation_frame, textvariable=operation_var,
+                                     values=["AL", "SAT"], state="readonly",
+                                     width=20, font=("Segoe UI", 11))
+        operation_combo.pack(fill=tk.X, pady=(5,0))
+
+        # Fiyat
+        price_frame = tk.Frame(form_frame, bg="#F8F9FA")
+        price_frame.pack(fill=tk.X, pady=5)
+        tk.Label(price_frame, text="Fiyat (TL):", font=("Segoe UI", 11),
+                bg="#F8F9FA", fg="#2C3E50").pack(anchor="w")
+        price_entry = ttk.Entry(price_frame, font=("Segoe UI", 11))
+        price_entry.pack(fill=tk.X, pady=(5,0))
+
+        # Adet
+        quantity_frame = tk.Frame(form_frame, bg="#F8F9FA")
+        quantity_frame.pack(fill=tk.X, pady=5)
+        tk.Label(quantity_frame, text="Adet:", font=("Segoe UI", 11),
+                bg="#F8F9FA", fg="#2C3E50").pack(anchor="w")
+        quantity_entry = ttk.Entry(quantity_frame, font=("Segoe UI", 11))
+        quantity_entry.pack(fill=tk.X, pady=(5,0))
+
+        # İşlem butonu
+        button_frame = tk.Frame(form_frame, bg="#F8F9FA")
+        button_frame.pack(fill=tk.X, pady=20)
+        ttk.Button(button_frame, text="İşlemi Kaydet",
+                  style="Accent.TButton", command=add_transaction).pack(fill=tk.X)
 
         # Hisse seçimi
         tk.Label(form_frame, text="Hisse Kodu:", bg="#ffffff", 
